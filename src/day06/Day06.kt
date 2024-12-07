@@ -119,14 +119,20 @@ fun main() {
 
         var nextMove = position
         var loop = 0
+        var iterations = 0
         val printMatrix: Array<Array<Char>> = matrix.map { it.copyOf() }.toTypedArray()
         val obstacleList = mutableListOf<Pair<Pair<Int, Int>, Char>>()
 
         while (isValid(matrix, nextMove)) {
+            iterations++
             //println("Trying nextMove ... $nextMove")
             val nextChar = matrix[nextMove.first][nextMove.second]
 
-            if (nextMove == changedPosition) loop++
+//            if (nextMove == changedPosition) loop++
+//            if (iterations > 100000) {
+//                loop = 2
+//                break
+//            }
             if (loop == 2) {
                 //println("Position making a loop $changedPosition")
                 break
