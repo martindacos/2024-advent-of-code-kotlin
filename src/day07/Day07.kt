@@ -11,11 +11,12 @@ fun main() {
         var i = 1
         while (i < tokens.size) {
             val operator = tokens[i]
-            val nextNumber = tokens[i + 1].toInt()
+            val nextNumber = tokens[i + 1].toLong()
 
             result = when (operator) {
                 "+" -> result + nextNumber
                 "*" -> result * nextNumber
+                "|" -> "$result$nextNumber".toLong()
                 else -> throw IllegalArgumentException("Unknown operator: $operator")
             }
 
@@ -25,8 +26,7 @@ fun main() {
         return result
     }
 
-    fun part1(lines: List<String>) {
-        val operators = listOf('*', '+')
+    fun solve(lines: List<String>, operators: List<Char>) {
         var finalResult: Long = 0
 
         for (line in lines) {
@@ -69,16 +69,13 @@ fun main() {
         println(finalResult)
     }
 
-    fun part2(lines: List<String>) {
-    }
-
     // Or read a large test input from the `src/Day_test.txt` file:
     val testInput = readInput("day07/Day_test")
-    part1(testInput)
-    //part2(testInput)
+    solve(testInput, listOf('*', '+'))
+    solve(testInput, listOf('*', '+', '|'))
 
     // Read the input from the `src/Day.txt` file.
     val input = readInput("day07/Day")
-    part1(input)
-    //part2(input)
+    solve(input, listOf('*', '+'))
+    solve(input, listOf('*', '+', '|'))
 }
