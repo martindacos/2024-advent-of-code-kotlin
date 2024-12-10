@@ -88,15 +88,41 @@ fun main() {
     }
 
     fun part2(lines: List<String>) {
+        val matrix: Array<Array<Int>> = lines
+            .map {
+                it.toCharArray().map { c -> if (c == '.') -1 else c.digitToInt() }.toTypedArray()
+            }.toTypedArray()
+
+        val positions = mutableListOf<Pair<Int, Int>>()
+
+        for (rowIndex in matrix.indices) {
+            for (colIndex in matrix[rowIndex].indices) {
+                if (matrix[rowIndex][colIndex] == 0) {
+                    positions.add(Pair(rowIndex, colIndex)) // Add the position to the list.
+                }
+            }
+        }
+
+        var score = 0
+        for (initPosition in positions) {
+            val pathList = mutableListOf<Pair<Int, Pair<Int, Int>>>()
+            findPaths(matrix, initPosition, pathList)
+
+            val totalEnds = pathList.filter { it.first == 9 }
+            println("Score for $initPosition is ${totalEnds.size}")
+            score += totalEnds.size
+        }
+
+        println(score)
     }
 
     // Or read a large test input from the `src/Day_test.txt` file:
     val testInput = readInput("day10/Day_test")
-    //part1(testInput)
-    //art2(testInput)
+    part1(testInput)
+    part2(testInput)
 
     // Read the input from the `src/Day.txt` file.
     val input = readInput("day10/Day")
     part1(input)
-    //part2(input)
+    part2(input)
 }
