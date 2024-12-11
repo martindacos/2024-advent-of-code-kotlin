@@ -4,7 +4,6 @@ import readAndSplitBySpaces
 
 fun main() {
 
-
     fun evenDigits(number: Long): Pair<Long, Long>? {
         val numStr = number.toString()
         if (numStr.length % 2 != 0) {
@@ -18,62 +17,45 @@ fun main() {
         return Pair(part1, part2)
     }
 
-    fun blinkChunk(numbers: List<Long>): List<Long> {
-        val newNumbers = mutableListOf<Long>()
-        for (number in numbers) {
-            if (number == 0L) {
-                newNumbers.add(1)
-            } else {
-                val evenParts = evenDigits(number)
-                if (evenParts != null) {
-                    newNumbers.add(evenParts.first)
-                    newNumbers.add(evenParts.second)
+    fun blink(numbers: Sequence<Long>): Sequence<Long> {
+        return sequence {
+            for (number in numbers) {
+                if (number == 0L) {
+                    yield(1)
                 } else {
-                    newNumbers.add(number * 2024)
+                    val evenParts = evenDigits(number)
+                    if (evenParts != null) {
+                        yield(evenParts.first)
+                        yield(evenParts.second)
+                    } else {
+                        yield(number * 2024)
+                    }
                 }
             }
         }
-        return newNumbers
     }
 
-    fun chunkedProcess(numbers: List<List<Long>>, chunkSize: Int): MutableList<List<Long>> {
-        val chunkedResults: MutableList<List<Long>> = mutableListOf()
-
-        for (number in numbers) {
-            number.chunked(chunkSize).forEach { chunk ->
-                val blinkResult = blinkChunk(chunk)
-                chunkedResults.add(blinkResult)
-            }
+    fun recursiveCount(numbers: Sequence<Long>, iterations: Int): Int {
+        if (iterations == 0) {
+            return numbers.count() // Base case: count the elements lazily
         }
+        println("Iteration $iterations")
 
-        return chunkedResults
+        val nextNumbers = blink(numbers)
+        return recursiveCount(nextNumbers, iterations - 1) // Recursive step: process next iteration
     }
 
-    fun countAllListSizes(numbers: List<List<Long>>): Long {
-        var counter = 0L
+    fun part1(numbers: List<Long>, iterations: Int) {
+        val initialSequence = numbers.asSequence()
+        val finalCount = recursiveCount(initialSequence, iterations)
 
-        for (number in numbers) {
-            counter += number.count()
-        }
-
-        return counter
-    }
-
-    fun part1(numbers: List<Long>, iterations: Int, chunkSize: Int) {
-        var currentNumbers: List<List<Long>> = mutableListOf(numbers)
-        for (i in 0 until iterations) {
-            currentNumbers = chunkedProcess(currentNumbers, chunkSize)
-            //println("Iteration $i has size ${currentNumbers.size}")
-            println("Iteration $i completed")
-        }
-
-        println("Final size: ${countAllListSizes(currentNumbers)}")
+        println("Final size after $iterations iterations: $finalCount")
     }
 
     // Or read a large test input from the `src/Day_test.txt` file:
     val testInput = readAndSplitBySpaces("day11/Day_test")
-    //part1(testInput, 6, 1000)
-    part1(testInput, 75, 1000)
+    //part1(testInput, 25)
+    part1(testInput, 75)
 
     // Read the input from the `src/Day.txt` file.
     val input = readAndSplitBySpaces("day11/Day")
