@@ -4,14 +4,13 @@ import readAndSplitBySpaces
 
 fun main() {
 
+
     fun evenDigits(number: Long): Pair<Long, Long>? {
-        // Convert the number to a string and take its absolute value to handle negatives
         val numStr = number.toString()
         if (numStr.length % 2 != 0) {
             return null
         }
 
-        // Split the string into two equal parts
         val mid = numStr.length / 2
         val part1 = numStr.substring(0, mid).toLong()
         val part2 = numStr.substring(mid).toLong()
@@ -19,49 +18,65 @@ fun main() {
         return Pair(part1, part2)
     }
 
-    fun blink(numbers: Sequence<Long>): Sequence<Long> {
-        return sequence {
-            for (number in numbers) {
-                if (number == 0L) {
-                    yield(1)
+    fun blinkChunk(numbers: List<Long>): List<Long> {
+        val newNumbers = mutableListOf<Long>()
+        for (number in numbers) {
+            if (number == 0L) {
+                newNumbers.add(1)
+            } else {
+                val evenParts = evenDigits(number)
+                if (evenParts != null) {
+                    newNumbers.add(evenParts.first)
+                    newNumbers.add(evenParts.second)
                 } else {
-                    val evenDigits = evenDigits(number)
-                    if (evenDigits != null) {
-                        yield(evenDigits.first)
-                        yield(evenDigits.second)
-                    } else {
-                        yield(number * 2024)
-                    }
+                    newNumbers.add(number * 2024)
                 }
             }
         }
+        return newNumbers
     }
 
-    fun countElements(sequence: Sequence<Long>): Long {
-        var count = 0L
-        sequence.forEach { _ -> count++ }
-        return count
-    }
+    fun chunkedProcess(numbers: List<List<Long>>, chunkSize: Int): MutableList<List<Long>> {
+        val chunkedResults: MutableList<List<Long>> = mutableListOf()
 
-    fun part1(numbers: List<Long>, iterations: Int) {
-        var currentNumbers: Sequence<Long> = numbers.asSequence()
-        for (i in 0 until iterations) {
-            currentNumbers = blink(currentNumbers)
-
-            println("Iteration $i has size ${countElements(currentNumbers)}")
-            //println("Iteration $i completed")
+        for (number in numbers) {
+            number.chunked(chunkSize).forEach { chunk ->
+                val blinkResult = blinkChunk(chunk)
+                chunkedResults.add(blinkResult)
+            }
         }
 
-        //println(countElements(currentNumbers))
+        return chunkedResults
+    }
+
+    fun countAllListSizes(numbers: List<List<Long>>): Long {
+        var counter = 0L
+
+        for (number in numbers) {
+            counter += number.count()
+        }
+
+        return counter
+    }
+
+    fun part1(numbers: List<Long>, iterations: Int, chunkSize: Int) {
+        var currentNumbers: List<List<Long>> = mutableListOf(numbers)
+        for (i in 0 until iterations) {
+            currentNumbers = chunkedProcess(currentNumbers, chunkSize)
+            //println("Iteration $i has size ${currentNumbers.size}")
+            println("Iteration $i completed")
+        }
+
+        println("Final size: ${countAllListSizes(currentNumbers)}")
     }
 
     // Or read a large test input from the `src/Day_test.txt` file:
     val testInput = readAndSplitBySpaces("day11/Day_test")
-    //part1(testInput, 6)
-    part1(testInput, 75)
+    //part1(testInput, 6, 1000)
+    part1(testInput, 75, 1000)
 
     // Read the input from the `src/Day.txt` file.
     val input = readAndSplitBySpaces("day11/Day")
-    //part1(input, 25)
+    //part1(input, 25, 1000)
     //part1(input, 75)
 }
