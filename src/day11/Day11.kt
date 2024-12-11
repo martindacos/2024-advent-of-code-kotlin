@@ -17,48 +17,51 @@ fun main() {
         return Pair(part1, part2)
     }
 
-    fun blink(numbers: Sequence<Long>): Sequence<Long> {
-        return sequence {
-            for (number in numbers) {
-                if (number == 0L) {
-                    yield(1)
+    fun blink(numbers: Map<Long, Long>): Map<Long, Long> {
+        val newNumbers: MutableMap<Long, Long> = mutableMapOf()
+
+        for (number in numbers) {
+            val count = number.value
+            if (number.key == 0L) {
+                val currentCount = newNumbers.getOrDefault(1L, 0)
+                newNumbers[1L] = currentCount + count
+            } else {
+                val evenParts = evenDigits(number.key)
+                if (evenParts != null) {
+                    val currentCount = newNumbers.getOrDefault(evenParts.first, 0)
+                    newNumbers[evenParts.first] = currentCount + count
+                    val currentCount2 = newNumbers.getOrDefault(evenParts.second, 0)
+                    newNumbers[evenParts.second] = currentCount2 + count
                 } else {
-                    val evenParts = evenDigits(number)
-                    if (evenParts != null) {
-                        yield(evenParts.first)
-                        yield(evenParts.second)
-                    } else {
-                        yield(number * 2024)
-                    }
+                    val currentCount = newNumbers.getOrDefault(number.key * 2024, 0)
+                    newNumbers[number.key * 2024] = currentCount + count
                 }
             }
         }
+
+        return newNumbers
     }
 
-    fun recursiveCount(numbers: Sequence<Long>, iterations: Int): Int {
-        if (iterations == 0) {
-            return numbers.count() // Base case: count the elements lazily
-        }
-        println("Iteration $iterations")
-
-        val nextNumbers = blink(numbers)
-        return recursiveCount(nextNumbers, iterations - 1) // Recursive step: process next iteration
+    fun countSize(numbers: Map<Long, Long>): Long {
+        return numbers.values.sum()
     }
 
     fun part1(numbers: List<Long>, iterations: Int) {
-        val initialSequence = numbers.asSequence()
-        val finalCount = recursiveCount(initialSequence, iterations)
+        var initialMap = numbers.map { it to 1L }.toMap()
+        for (i in 0 until iterations) {
+            initialMap = blink(initialMap)
+        }
 
-        println("Final size after $iterations iterations: $finalCount")
+        println("Final size after $iterations iterations is ${countSize(initialMap)}")
     }
 
     // Or read a large test input from the `src/Day_test.txt` file:
     val testInput = readAndSplitBySpaces("day11/Day_test")
     //part1(testInput, 25)
-    part1(testInput, 75)
+    //part1(testInput, 75)
 
     // Read the input from the `src/Day.txt` file.
     val input = readAndSplitBySpaces("day11/Day")
-    //part1(input, 25, 1000)
-    //part1(input, 75)
+    //part1(input, 25)
+    part1(input, 75)
 }
