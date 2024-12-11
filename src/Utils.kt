@@ -8,6 +8,18 @@ import kotlin.io.path.readText
  */
 fun readInput(name: String) = Path("src/$name.txt").readText().trim().lines()
 
+fun readAndSplitBySpaces(name: String): List<Long> {
+    val file = Path("src/$name.txt").toFile()
+    val numbers = mutableListOf<Long>()
+
+    file.forEachLine { line ->
+        val elements = line.split("\\s+".toRegex()).map { it.toLong() }
+        numbers.addAll(elements)
+    }
+
+    return numbers
+}
+
 fun processFile(name: String): Pair<List<Int>, List<Int>> {
     val file = Path("src/$name.txt").toFile()
     val beforeSpace = mutableListOf<Int>()
