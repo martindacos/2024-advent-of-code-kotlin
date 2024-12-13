@@ -4,13 +4,13 @@ import readInput
 
 fun main() {
 
-    fun readRegex(line: String, regex: Regex): Pair<Int, Int> {
+    fun readRegex(line: String, regex: Regex): Pair<Long, Long> {
         val matchResult = regex.find(line)
         if (matchResult != null) {
             val (x, y) = matchResult.destructured
             //println("X: $x")
             //println("Y: $y")
-            return Pair(x.toInt(), y.toInt())
+            return Pair(x.toLong(), y.toLong())
         } else {
             //println("No match found")
         }
@@ -18,10 +18,10 @@ fun main() {
         return Pair(-1, -1)
     }
 
-    fun solve(lines: List<String>): Int {
+    fun solve(lines: List<String>, conversion: Long): Long {
         val target = readRegex(lines[2], "X=(\\d+), Y=(\\d+)".toRegex())
-        val xTarget = target.first
-        val yTarget = target.second
+        val xTarget = target.first + conversion
+        val yTarget = target.second + conversion
 
         // Button increments
         val aButton = readRegex(lines[0], "X\\+(\\d+), Y\\+(\\d+)".toRegex())
@@ -31,48 +31,53 @@ fun main() {
         val bX = bButton.first
         val bY = bButton.second
 
-        // Costs per press
-        val costA = 3
-        val costB = 1
+        val costA = 3L
 
-        var optimalA = -1
-        var optimalB = -1
-        var minCost = Int.MAX_VALUE
+        fun areMultiples(): Boolean = when {
+            aX * bY != aY * bX -> false
+            aX * yTarget != aY * xTarget -> false
+            bX * yTarget != bY * xTarget -> false
+            else -> true
+        }
 
-        // Iterate through possible values of a
-        for (a in 0..(xTarget / aX)) {
-            val remainingX = xTarget - a * aX
-            val remainingY = yTarget - a * aY
-
-            // Check if remaining values are divisible by Button B increments
-            if (remainingX >= 0 && remainingY >= 0 && remainingX % bX == 0 && remainingY % bY == 0) {
-                val b = remainingX / bX // Derive b from remainingX
-
-                // Validate that b also satisfies the Y equation
-                if (remainingY == b * bY) {
-                    val cost = a * costA + b * costB
-                    if (cost < minCost) {
-                        minCost = cost
-                        optimalA = a
-                        optimalB = b
-                    }
+        if (areMultiples()) { // Infinite Solutions
+            if (aX != 0L) {
+                val a = xTarget / aX
+                if (xTarget % aX == 0L && a >= 0) {
+                    return a * costA + 0L
                 }
+            }
+            if (bX != 0L) {
+                val b = xTarget / bX
+                if (xTarget % bX == 0L && b >= 0) {
+                    return 0L * costA + b
+                }
+            }
+            return 0L
+        }
+
+        val delta = aX * bY - aY * bX
+        if (delta != 0L) { // Unique solution
+            val x = (xTarget * bY - yTarget * bX) / delta
+            if ((xTarget * bY - yTarget * bX) % delta != 0L) {
+                return 0L
+            }
+            val y = (aX * yTarget - aY * xTarget) / delta
+            if ((aX * yTarget - aY * xTarget) % delta != 0L) {
+                return 0L
+            }
+            if (x >= 0 && y >= 0) {
+                return x * costA + y
             }
         }
 
-        if (optimalA != -1 && optimalB != -1) {
-            println("Optimal solution: A = $optimalA, B = $optimalB, Minimum Cost = $minCost")
-            return minCost
-        } else {
-            println("No solution found")
-            return 0
-        }
+        return 0L
     }
 
-    fun part1(lines: List<String>) {
-        var totalTokens = 0
+    fun part1(lines: List<String>, conversion: Long) {
+        var totalTokens = 0L
         for (i in lines.indices step 4) {
-            totalTokens += solve(listOf(lines[i], lines[i + 1], lines[i + 2]))
+            totalTokens += solve(listOf(lines[i], lines[i + 1], lines[i + 2]), conversion)
         }
 
         println("Total tokens: $totalTokens")
@@ -80,11 +85,11 @@ fun main() {
 
     // Or read a large test input from the `src/Day_test.txt` file:
     val testInput = readInput("day13/Day_test")
-    //part1(testInput)
-    //part1(testInput)
+    //part1(testInput, 0L)
+    //part1(testInput, 10000000000000L)
 
     // Read the input from the `src/Day.txt` file.
     val input = readInput("day13/Day")
-    part1(input)
-    //part1(input)
+    //part1(input, 0L)
+    part1(input, 10000000000000L)
 }
