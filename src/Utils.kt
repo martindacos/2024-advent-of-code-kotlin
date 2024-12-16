@@ -8,6 +8,25 @@ import kotlin.io.path.readText
  */
 fun readInput(name: String) = Path("src/$name.txt").readText().trim().lines()
 
+fun readMatrix(name: String) = readInput(name).map { it.toCharArray().toTypedArray() }
+    .toTypedArray()
+
+fun printMatrix(matrix: Array<Array<Char>>) {
+    matrix.forEach { println(it.joinToString("")) }
+    println()
+}
+
+fun findFirstCharInMatrix(matrix: Array<Array<Char>>, char: Char): Pair<Int, Int> {
+    for (i in matrix.indices) {
+        for (j in matrix[i].indices) {
+            if (matrix[i][j] == char) {
+                return i to j
+            }
+        }
+    }
+    return Pair(-1, -1)
+}
+
 fun readAndSplitBySpaces(name: String): List<Long> {
     val file = Path("src/$name.txt").toFile()
     val numbers = mutableListOf<Long>()
